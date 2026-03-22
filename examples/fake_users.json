@@ -1,0 +1,122 @@
+[
+  {
+    "id": "00u1a",
+    "login": "sarah.chen@acmecorp.com",
+    "first_name": "Sarah",
+    "last_name": "Chen",
+    "status": "ACTIVE",
+    "last_login": "2026-03-20T09:15:00Z",
+    "created": "2023-01-10T08:00:00Z",
+    "apps": ["Slack", "Google Workspace", "Jira", "Confluence"],
+    "groups": ["Everyone", "Engineering", "Jira-Users"],
+    "admin_roles": []
+  },
+  {
+    "id": "00u2b",
+    "login": "marcus.johnson@acmecorp.com",
+    "first_name": "Marcus",
+    "last_name": "Johnson",
+    "status": "ACTIVE",
+    "last_login": "2025-11-01T14:30:00Z",
+    "created": "2022-06-15T08:00:00Z",
+    "apps": ["Slack", "Google Workspace", "Salesforce", "Workday", "Jira", "Confluence", "GitHub", "AWS Console", "Okta Admin", "Zoom", "DocuSign", "Tableau", "ServiceNow", "PagerDuty", "Datadog"],
+    "groups": ["Everyone", "Engineering", "Finance-ReadOnly", "HR-ReadOnly", "DevOps", "Security-Team", "Executives", "Salesforce-Admins"],
+    "admin_roles": ["ORG_ADMIN"]
+  },
+  {
+    "id": "00u3c",
+    "login": "priya.patel@acmecorp.com",
+    "first_name": "Priya",
+    "last_name": "Patel",
+    "status": "ACTIVE",
+    "last_login": "2025-08-14T11:00:00Z",
+    "created": "2021-03-22T08:00:00Z",
+    "apps": ["Slack", "Google Workspace", "Workday", "Jira"],
+    "groups": ["Everyone", "HR", "Workday-Users"],
+    "admin_roles": []
+  },
+  {
+    "id": "00u4d",
+    "login": "derek.walsh@acmecorp.com",
+    "first_name": "Derek",
+    "last_name": "Walsh",
+    "status": "ACTIVE",
+    "last_login": "2025-06-30T09:45:00Z",
+    "created": "2020-09-01T08:00:00Z",
+    "apps": ["Slack", "Google Workspace", "Jira", "GitHub", "AWS Console", "Datadog", "PagerDuty", "Confluence", "Okta Admin", "Zoom"],
+    "groups": ["Everyone", "Engineering", "DevOps", "Security-Team", "Executives"],
+    "admin_roles": ["SUPER_ADMIN"]
+  },
+  {
+    "id": "00u5e",
+    "login": "temp.contractor_bobsmith@acmecorp.com",
+    "first_name": "Bob",
+    "last_name": "Smith",
+    "status": "ACTIVE",
+    "last_login": "2025-09-03T16:20:00Z",
+    "created": "2025-01-15T08:00:00Z",
+    "apps": ["Slack", "Google Workspace", "GitHub", "AWS Console", "Jira", "Confluence", "Datadog", "PagerDuty"],
+    "groups": ["Everyone", "Engineering", "DevOps", "Contractors"],
+    "admin_roles": []
+  },
+  {
+    "id": "00u6f",
+    "login": "linda.torres@acmecorp.com",
+    "first_name": "Linda",
+    "last_name": "Torres",
+    "status": "ACTIVE",
+    "last_login": null,
+    "created": "2026-01-05T08:00:00Z",
+    "apps": ["Slack", "Google Workspace", "Workday", "Salesforce", "Tableau"],
+    "groups": ["Everyone", "Sales", "Salesforce-Users"],
+    "admin_roles": []
+  },
+  {
+    "id": "00u7g",
+    "login": "james.okafor@acmecorp.com",
+    "first_name": "James",
+    "last_name": "Okafor",
+    "status": "ACTIVE",
+    "last_login": null,
+    "created": "2025-12-01T08:00:00Z",
+    "apps": ["Slack", "Google Workspace", "GitHub", "AWS Console", "Jira", "Datadog"],
+    "groups": ["Everyone", "Engineering", "DevOps"],
+    "admin_roles": ["APP_ADMIN"]
+  },
+  {
+    "id": "00u8h",
+    "login": "rachel.kim@acmecorp.com",
+    "first_name": "Rachel",
+    "last_name": "Kim",
+    "status": "ACTIVE",
+    "last_login": "2026-03-18T10:00:00Z",
+    "created": "2023-07-11T08:00:00Z",
+    "apps": ["Slack", "Google Workspace", "Salesforce", "Zoom"],
+    "groups": ["Everyone", "Sales", "Salesforce-Users"],
+    "admin_roles": []
+  },
+  {
+    "id": "00u9i",
+    "login": "tom.nguyen@acmecorp.com",
+    "first_name": "Tom",
+    "last_name": "Nguyen",
+    "status": "ACTIVE",
+    "last_login": "2025-05-10T08:30:00Z",
+    "created": "2019-11-01T08:00:00Z",
+    "apps": ["Slack", "Google Workspace", "Jira", "Confluence", "GitHub", "AWS Console", "Workday", "ServiceNow", "Okta Admin", "Zoom", "DocuSign", "Tableau", "PagerDuty"],
+    "groups": ["Everyone", "Engineering", "Finance-ReadOnly", "HR-ReadOnly", "DevOps", "Security-Team", "Executives", "Contractors"],
+    "admin_roles": ["SUPER_ADMIN", "APP_ADMIN"]
+  },
+  {
+    "id": "00u10j",
+    "login": "emily.brooks@acmecorp.com",
+    "first_name": "Emily",
+    "last_name": "Brooks",
+    "status": "ACTIVE",
+    "last_login": "2026-03-21T14:00:00Z",
+    "created": "2024-04-01T08:00:00Z",
+    "apps": ["Slack", "Google Workspace", "Workday"],
+    "groups": ["Everyone", "HR"],
+    "admin_roles": []
+  }
+]
