@@ -57,9 +57,7 @@ async def get_all_users(client: OktaClient) -> list[dict]:
     """
     users = []
 
-    # query_params limits results to ACTIVE users only — we can expand this later
-    # to include SUSPENDED users if we want to flag those too
-    query_params = {"filter": 'status eq "ACTIVE"'}
+    query_params = {"limit": 200}
     user_list, resp, err = await client.list_users(query_params)
 
     if err:
@@ -70,9 +68,15 @@ async def get_all_users(client: OktaClient) -> list[dict]:
         for user in user_list:
             profile = user.profile
 
-            # last_login comes back as a datetime object or None
-            last_login = user.last_login.isoformat() if user.last_login else None
-            created = user.created.isoformat() if user.created else None
+            # last_login and created may come back as datetime or string
+            # depending on the Okta SDK version — handle both
+            last_login = user.last_login if user.last_login else None
+            if last_login and hasattr(last_login, "isoformat"):
+                last_login = last_login.isoformat()
+
+            created = user.created if user.created else None
+            if created and hasattr(created, "isoformat"):
+                created = created.isoformat()
 
             users.append({
                 "id": user.id,
