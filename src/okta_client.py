@@ -47,13 +47,22 @@ async def get_all_users(client: OktaClient) -> list[dict]:
 
     Returns:
         A list of dicts, one per user, with these keys:
-            - id           (str)  Okta's internal user ID — used to look up apps/groups
-            - login        (str)  The user's email/username
-            - first_name   (str)
-            - last_name    (str)
-            - status       (str)  e.g. "ACTIVE", "SUSPENDED", "DEPROVISIONED"
-            - last_login   (str)  ISO timestamp or None if they've never logged in
-            - created      (str)  ISO timestamp when the account was created
+            - id             (str)       Okta's internal user ID — used to look up apps/groups
+            - login          (str)       The user's email/username
+            - first_name     (str)       First name
+            - last_name      (str)       Last name
+            - status         (str)       e.g. "ACTIVE", "SUSPENDED", "DEPROVISIONED"
+            - last_login     (str|None)  ISO timestamp or None if they've never logged in
+            - created        (str|None)  ISO timestamp when the account was created
+            - department     (str|None)  Department name
+            - title          (str|None)  Job title
+            - user_type      (str|None)  Employee type (full_time, contractor, service_account)
+            - manager        (str|None)  Manager's login/email
+            - mobile_phone   (str|None)  Mobile phone number
+            - city           (str|None)  City
+            - state          (str|None)  State/province
+            - cost_center    (str|None)  Cost center code
+            - employee_number(str|None)  Employee ID
     """
     users = []
 
@@ -78,6 +87,11 @@ async def get_all_users(client: OktaClient) -> list[dict]:
             if created and hasattr(created, "isoformat"):
                 created = created.isoformat()
 
+            # password_changed may be on the user object or credentials
+            password_changed = getattr(user, "password_changed", None)
+            if password_changed and hasattr(password_changed, "isoformat"):
+                password_changed = password_changed.isoformat()
+
             users.append({
                 "id": user.id,
                 "login": profile.login,
@@ -86,6 +100,16 @@ async def get_all_users(client: OktaClient) -> list[dict]:
                 "status": user.status.value,
                 "last_login": last_login,
                 "created": created,
+                "password_changed": password_changed,
+                "department": getattr(profile, "department", None),
+                "title": getattr(profile, "title", None),
+                "user_type": getattr(profile, "user_type", None),
+                "manager": getattr(profile, "manager", None),
+                "mobile_phone": getattr(profile, "mobile_phone", None),
+                "city": getattr(profile, "city", None),
+                "state": getattr(profile, "state", None),
+                "cost_center": getattr(profile, "cost_center", None),
+                "employee_number": getattr(profile, "employee_number", None),
             })
 
         # If there's another page, fetch it; otherwise stop
@@ -224,12 +248,14 @@ async def collect_all_user_data(client: OktaClient) -> list[dict]:
 
     Returns:
         A list of fully enriched user dicts, each with keys:
-            id, login, first_name, last_name, status, last_login,
-            created, apps, groups, admin_roles
+            id, login, first_name, last_name, status, last_login, created,
+            password_changed, department, title, user_type, manager,
+            mobile_phone, city, state, cost_center, employee_number,
+            apps, groups, admin_roles, risk_signals
     """
     print("Fetching users from Okta...")
     users = await get_all_users(client)
-    print(f"Found {len(users)} active users. Fetching access details...")
+    print(f"Found {len(users)} users. Fetching access details...")
 
     # For each user, fetch their apps, groups, and roles in parallel.
     # asyncio.gather() runs multiple async calls at the same time instead of
@@ -250,5 +276,86 @@ async def collect_all_user_data(client: OktaClient) -> list[dict]:
         # Simple progress indicator so we know it's working
         print(f"  [{i + 1}/{len(users)}] Collected data for {user['login']}")
 
+    # Pre-compute risk signals that are easier to calculate here than
+    # ask the AI to derive from raw data
+    print("Computing risk signals...")
+    _compute_risk_signals(users)
+
     print("Done collecting Okta data.")
     return users
+
+
+def _compute_risk_signals(users: list[dict]) -> None:
+    """
+    Pre-computes risk signals from the collected data and attaches them
+    to each user dict. These give the AI concrete flags to work with
+    instead of asking it to derive everything from raw fields.
+
+    Signals computed:
+      - is_contractor:        True if user_type contains "contractor"
+      - is_service_account:   True if login starts with "svc."
+      - has_no_manager:       True if manager field is empty
+      - profile_incomplete:   True if key profile fields are missing
+      - app_count:            Total number of app assignments
+      - group_count:          Total number of group memberships
+      - department_groups:    List of department groups (dept-*) the user is in
+      - cross_dept_count:     Number of department groups beyond their own
+      - possible_duplicates:  Logins of other users with the same first+last name
+
+    Args:
+        users: The enriched user list — modified in place.
+    """
+    # Build a name→logins index to detect duplicate identities
+    name_index: dict[str, list[str]] = {}
+    for user in users:
+        full_name = f"{user['first_name']} {user['last_name']}".strip().lower()
+        if full_name:
+            name_index.setdefault(full_name, []).append(user["login"])
+
+    for user in users:
+        login = user["login"]
+        user_type = (user.get("user_type") or "").lower()
+        department = (user.get("department") or "").lower()
+
+        # Identity flags
+        is_contractor = "contractor" in user_type
+        is_service_account = login.startswith("svc.") or "service" in user_type
+
+        # Manager and profile completeness
+        has_no_manager = not user.get("manager")
+        missing_fields = [
+            f for f in ["mobile_phone", "city", "state", "cost_center"]
+            if not user.get(f)
+        ]
+        profile_incomplete = len(missing_fields) >= 2
+
+        # Access volume
+        app_count = len(user.get("apps", []))
+        group_count = len(user.get("groups", []))
+
+        # Cross-department group analysis
+        dept_groups = [
+            g for g in user.get("groups", [])
+            if "dept-" in g.lower() and "everyone" not in g.lower()
+        ]
+        # The user's own dept group is expected — anything beyond that is cross-dept
+        own_dept_group = f"dept-{department}" if department else ""
+        cross_dept = [g for g in dept_groups if own_dept_group not in g.lower()]
+
+        # Duplicate identity detection
+        full_name = f"{user['first_name']} {user['last_name']}".strip().lower()
+        name_matches = name_index.get(full_name, [])
+        possible_dupes = [l for l in name_matches if l != login]
+
+        user["risk_signals"] = {
+            "is_contractor": is_contractor,
+            "is_service_account": is_service_account,
+            "has_no_manager": has_no_manager,
+            "profile_incomplete": profile_incomplete,
+            "missing_profile_fields": missing_fields,
+            "app_count": app_count,
+            "group_count": group_count,
+            "department_groups": dept_groups,
+            "cross_dept_count": len(cross_dept),
+            "possible_duplicates": possible_dupes,
+        }
