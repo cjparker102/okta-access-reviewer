@@ -1,7 +1,7 @@
 """
 report.py
 
-Responsible for writing Claude's analysis to a file and printing a
+Responsible for writing the AI analysis to a file and printing a
 summary to the terminal. Think of this as the "output" layer —
 it takes the finished analysis and delivers it in a useful format.
 """
@@ -42,7 +42,7 @@ def save_report(analysis: str, output_dir: str = "reports") -> str:
 
 **Generated:** {datetime.now().strftime("%B %d, %Y at %I:%M %p")}
 **Tool:** okta-access-reviewer
-**Model:** claude-opus-4-6
+**Engine:** AI-powered analysis
 
 ---
 
@@ -74,7 +74,6 @@ def print_summary(analysis: str) -> None:
     # This gives a quick overview without dumping the whole report to the terminal.
     for line in analysis.splitlines():
         if line.startswith("## "):
-            # Strip the "## " prefix for cleaner terminal output
             print(f"  • {line[3:].strip()}")
 
     print("=" * 60 + "\n")
